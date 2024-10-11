@@ -4,6 +4,7 @@ This demo app is a frontend for the GitHub GraphQL API. The frontend allows you 
 
 ## Technologies used
 
+- Typescript v5
 - React.js v18
 - Next.js v14, using the Pages Router
 - Styled Components v6
