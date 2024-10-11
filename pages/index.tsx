@@ -1,23 +1,27 @@
 import { useState } from 'react'
 import Link from 'next/link'
-import { ApolloError, useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client'
 import {
   GetIssuesDocument,
   GetIssuesQuery,
 } from '@/graphql/__generated__/graphql'
-import type { ServerError } from '@apollo/client/link/utils/index.js'
 import client from '@/lib/apolloClient'
+import { ApiError, processServerError } from '@/lib/errors'
 
 function Results({ initialData }: { initialData: GetIssuesQuery }) {
   const [data, setData] = useState(initialData)
 
-  // Use Apollo useQuery to fetch data on client-side
   const { loading, error, refetch } = useQuery<GetIssuesQuery>(
     GetIssuesDocument,
     {
-      skip: true, // Skip automatic execution on page load
+      skip: true,
     }
   )
+
+  let apiError: ApiError | null = null
+  if (error) {
+    apiError = processServerError(error)
+  }
 
   const handleRefresh = async () => {
     const result = await refetch()
@@ -32,7 +36,7 @@ function Results({ initialData }: { initialData: GetIssuesQuery }) {
       <button onClick={handleRefresh}>Refresh Data</button>
 
       {loading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
+      {!!apiError && <p>Error: {apiError.message}</p>}
 
       <div>
         {data.repository!.issues.edges!.map((item) => (
@@ -47,18 +51,16 @@ function Results({ initialData }: { initialData: GetIssuesQuery }) {
 
 export default function Home({
   initialData,
-  errorCode,
-  errorMessage,
+  apiError,
 }: {
   initialData?: GetIssuesQuery
-  errorCode?: number
-  errorMessage?: string
+  apiError?: ApiError
 }) {
-  if (errorCode) {
+  if (apiError) {
     return (
       <div>
-        <h1>Error {errorCode}</h1>
-        <p>{errorMessage}</p>
+        <h1>Error {apiError.code}</h1>
+        <p>{apiError.message}</p>
       </div>
     )
   }
@@ -79,31 +81,9 @@ export async function getServerSideProps() {
       },
     }
   } catch (error) {
-    console.error(JSON.stringify(error, null))
-    if (error instanceof ApolloError && error.networkError) {
-      const serverError = error.networkError as ServerError
-      switch (serverError.statusCode) {
-        case 403:
-          return {
-            props: {
-              errorCode: 403,
-              errorMessage: 'Rate limit exceeded. Please try again later.',
-            },
-          }
-        default: {
-          return {
-            props: {
-              errorCode: serverError?.statusCode ?? 500,
-              errorMessage: 'An unexpected network error occurred.',
-            },
-          }
-        }
-      }
-    }
     return {
       props: {
-        errorCode: 500,
-        errorMessage: 'An unexpected GraphQL error occurred.',
+        apiError: processServerError(error),
       },
     }
   }
