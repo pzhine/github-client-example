@@ -1,0 +1,13 @@
+query getIssues {
+  repository(owner: "facebook", name: "react") {
+    issues(last:20, states:CLOSED) {
+      edges {
+        node {
+          title
+          url
+          number
+        }
+      }
+    }
+  }
+}

@@ -1,10 +1,8 @@
-import "styled-components";
+import 'styled-components'
+import { lightTheme } from './components/_globalstyles'
 
-declare module "styled-components" {
-  export interface DefaultTheme {
-    colors: {
-      primary: string;
-      secondary: string;
-    };
-  }
+export type ThemeType = typeof lightTheme
+
+declare module 'styled-components' {
+  export interface DefaultTheme extends ThemeType {}
 }
