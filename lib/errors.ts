@@ -14,6 +14,10 @@ export function processServerError(error: any): ApiError {
     message: 'An unexpected error occurred.',
     apiMessage: error.message,
   }
+  if (typeof window !== 'undefined' && !window.navigator.onLine) {
+    apiError.message =
+      'You appear to be offline. Please connect to the internet and try again.'
+  }
   if (!(error instanceof ApolloError)) {
     return apiError
   }

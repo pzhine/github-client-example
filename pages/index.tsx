@@ -1,78 +1,107 @@
-import { useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import {
-  GetIssuesDocument,
-  GetIssuesQuery,
+  SearchIssuesDocument,
+  SearchIssuesQuery,
 } from '@/graphql/__generated__/graphql'
 import client from '@/lib/apolloClient'
 import { ApiError, processServerError } from '@/lib/errors'
+import { GetServerSideProps } from 'next'
+import { IssueList } from '@/components/IssueList'
+import { Error } from '@/components/Error'
+import { SearchBar } from '@/components/SearchBar'
+import { useRouter } from 'next/router'
+import { Loading } from '@/components/Loading'
 
-function Results({ initialData }: { initialData: GetIssuesQuery }) {
-  const [data, setData] = useState(initialData)
+type IssueStateFilters = 'open' | 'closed' | 'any'
 
-  const { loading, error, refetch } = useQuery<GetIssuesQuery>(
-    GetIssuesDocument,
-    {
-      skip: true,
-    }
-  )
-
-  let apiError: ApiError | null = null
-  if (error) {
-    apiError = processServerError(error)
-  }
-
-  const handleRefresh = async () => {
-    const result = await refetch()
-    setData(result.data)
-  }
-
-  if (!data) return <p>No data available</p>
-
-  return (
-    <div>
-      <h1>Items List</h1>
-      <button onClick={handleRefresh}>Refresh Data</button>
-
-      {loading && <p>Loading...</p>}
-      {!!apiError && <p>Error: {apiError.message}</p>}
-
-      <div>
-        {data.repository!.issues.edges!.map((item) => (
-          <Link key={item?.node?.url} href={`issue/${item!.node!.number}`}>
-            {item?.node?.title}
-          </Link>
-        ))}
-      </div>
-    </div>
-  )
+function buildSearchQuery(
+  query: string,
+  stateFilter: IssueStateFilters = 'any'
+) {
+  return `repo:facebook/react in:title in:body ${query}`
 }
 
 export default function Home({
   initialData,
   apiError,
 }: {
-  initialData?: GetIssuesQuery
+  initialData?: SearchIssuesQuery
   apiError?: ApiError
 }) {
+  const router = useRouter()
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const queryFromRouter =
+    typeof router.query?.q === 'string' && router.query?.q
+
   if (apiError) {
-    return (
-      <div>
-        <h1>Error {apiError.code}</h1>
-        <p>{apiError.message}</p>
-      </div>
-    )
+    return <Error>{apiError.message}</Error>
   }
 
-  return <Results initialData={initialData!} />
+  const { loading, error, data } = useQuery<SearchIssuesQuery>(
+    SearchIssuesDocument,
+    {
+      skip: isInitialLoad,
+      variables: {
+        searchQuery: buildSearchQuery(queryFromRouter || ''),
+      },
+    }
+  )
+
+  if (error) {
+    const apiError = processServerError(error)
+    return <Error>{apiError.message}</Error>
+  }
+
+  // const handleRefresh = async () => {
+  //   const result = await refetch()
+  //   setData(result.data)
+  // }
+
+  const onSearchBarSubmit = (value: string) => {
+    console.log('[onSearchBarSubmit]', value)
+    router.push(
+      {
+        query: { q: value },
+      },
+      undefined,
+      { shallow: true }
+    )
+    setIsInitialLoad(false)
+  }
+
+  return (
+    <>
+      <SearchBar
+        onSubmit={onSearchBarSubmit}
+        initialValue={router.query?.q as string}
+        {...(queryFromRouter
+          ? {
+              key: queryFromRouter,
+            }
+          : {})}
+      />
+      {loading ? (
+        <Loading />
+      ) : (
+        <IssueList
+          issueEdges={
+            isInitialLoad ? initialData!.search.edges : data?.search.edges
+          }
+        />
+      )}
+    </>
+  )
 }
 
-// Fetch data on the server-side
-export async function getServerSideProps() {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  console.log('[getServerSideProps] context.query', context.query)
   try {
-    const { data } = await client.query<GetIssuesQuery>({
-      query: GetIssuesDocument,
+    const { data } = await client.query<SearchIssuesQuery>({
+      query: SearchIssuesDocument,
+      variables: {
+        searchQuery: buildSearchQuery(context.query.q as string),
+      },
     })
 
     return {

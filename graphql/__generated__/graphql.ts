@@ -31714,6 +31714,13 @@ export type GetIssuesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetIssuesQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', issues: { __typename?: 'IssueConnection', edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', title: string, url: any, number: number } | null } | null> | null } } | null };
 
+export type SearchIssuesQueryVariables = Exact<{
+  searchQuery: Scalars['String']['input'];
+}>;
+
+
+export type SearchIssuesQuery = { __typename?: 'Query', search: { __typename?: 'SearchResultItemConnection', issueCount: number, edges?: Array<{ __typename?: 'SearchResultItemEdge', node?: { __typename?: 'App' } | { __typename?: 'Discussion' } | { __typename?: 'Issue', number: number, title: string, state: IssueState } | { __typename?: 'MarketplaceListing' } | { __typename?: 'Organization' } | { __typename?: 'PullRequest' } | { __typename?: 'Repository' } | { __typename?: 'User' } | null } | null> | null } };
+
 
 export const GetIssueDetailDocument = gql`
     query getIssueDetail($issueNumber: Int!) {
@@ -31821,3 +31828,52 @@ export type GetIssuesQueryHookResult = ReturnType<typeof useGetIssuesQuery>;
 export type GetIssuesLazyQueryHookResult = ReturnType<typeof useGetIssuesLazyQuery>;
 export type GetIssuesSuspenseQueryHookResult = ReturnType<typeof useGetIssuesSuspenseQuery>;
 export type GetIssuesQueryResult = Apollo.QueryResult<GetIssuesQuery, GetIssuesQueryVariables>;
+export const SearchIssuesDocument = gql`
+    query SearchIssues($searchQuery: String!) {
+  search(query: $searchQuery, type: ISSUE, first: 20) {
+    issueCount
+    edges {
+      node {
+        ... on Issue {
+          number
+          title
+          state
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useSearchIssuesQuery__
+ *
+ * To run a query within a React component, call `useSearchIssuesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchIssuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchIssuesQuery({
+ *   variables: {
+ *      searchQuery: // value for 'searchQuery'
+ *   },
+ * });
+ */
+export function useSearchIssuesQuery(baseOptions: Apollo.QueryHookOptions<SearchIssuesQuery, SearchIssuesQueryVariables> & ({ variables: SearchIssuesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchIssuesQuery, SearchIssuesQueryVariables>(SearchIssuesDocument, options);
+      }
+export function useSearchIssuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchIssuesQuery, SearchIssuesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchIssuesQuery, SearchIssuesQueryVariables>(SearchIssuesDocument, options);
+        }
+export function useSearchIssuesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchIssuesQuery, SearchIssuesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchIssuesQuery, SearchIssuesQueryVariables>(SearchIssuesDocument, options);
+        }
+export type SearchIssuesQueryHookResult = ReturnType<typeof useSearchIssuesQuery>;
+export type SearchIssuesLazyQueryHookResult = ReturnType<typeof useSearchIssuesLazyQuery>;
+export type SearchIssuesSuspenseQueryHookResult = ReturnType<typeof useSearchIssuesSuspenseQuery>;
+export type SearchIssuesQueryResult = Apollo.QueryResult<SearchIssuesQuery, SearchIssuesQueryVariables>;

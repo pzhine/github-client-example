@@ -1,0 +1,14 @@
+query SearchIssues($searchQuery: String!) {
+  search(query: $searchQuery, type: ISSUE, first: 20) {
+    issueCount
+    edges {
+      node {
+        ... on Issue {
+          number
+          title
+          state
+        }
+      }
+    }
+  }
+}

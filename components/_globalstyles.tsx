@@ -5,11 +5,15 @@ export const lightTheme = {
   colors: {
     text: '#111',
     background: '#fff',
+    error: '#f04532',
+    loading: '#bd60b8',
   },
 }
 
 export const darkTheme: ThemeType = {
+  ...lightTheme,
   colors: {
+    ...lightTheme.colors,
     text: '#fff',
     background: '#333',
   },
