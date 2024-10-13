@@ -27,6 +27,7 @@ interface QueryVariables {
   after?: string
 }
 
+// using parameters from the url query, build a variables object for the GQL query
 function buildSearchVariables(
   query: ParsedUrlQuery,
   after: string | null
@@ -39,11 +40,14 @@ function buildSearchVariables(
   // console.log('[buildSearchQuery]', searchQuery, after)
 
   const first =
+    // only use first from query string for SSR,
+    // where we won't ever have 'after' specified
     !after &&
     typeof query?.first === 'string' &&
     !query.first.match(/[^0-9]/)
       ? parseInt(query.first)
-      : issuesPerPage
+      : // default to issuesPerPage
+        issuesPerPage
 
   return {
     searchQuery,
@@ -52,6 +56,7 @@ function buildSearchVariables(
   }
 }
 
+// transform GQL results to flat issues list
 function issueNodesFromQueryData(
   queryData?: SearchIssuesQuery
 ): IssueNode[] {
@@ -77,7 +82,7 @@ function queryVariablesAreIdentical(
   )
 }
 
-export default function Home({
+export default function IssueBrowser({
   initialData,
   apiError,
 }: {
@@ -117,9 +122,11 @@ export default function Home({
 
   // console.log('[render] variables', variablesFromRoute)
 
+  // client-side query
   const { loading, error, data } = useQuery<SearchIssuesQuery>(
     SearchIssuesDocument,
     {
+      // skip when the query variables haven't changed from the SSR initialData
       skip: queryVariablesAreIdentical(
         variablesFromRoute,
         searchQueryRef.current.variables
@@ -127,6 +134,8 @@ export default function Home({
       variables: variablesFromRoute,
     }
   )
+  // if data is populated, put a snapshot of it and the query variables in the route
+  // we'll use these next when deciding how to update the issue list in local state
   if (data) {
     searchQueryRef.current.data = data
     searchQueryRef.current.variables = variablesFromRoute
@@ -158,10 +167,7 @@ export default function Home({
     prevQueryVariablesRef.current = { ...searchQueryRef.current.variables }
   }, [searchQueryRef.current.data, router.query])
 
-  if (error) {
-    const apiError = processServerError(error)
-    return <Error>{apiError.message}</Error>
-  }
+  // BEGIN event handlers
 
   const onSearchBarSubmit = useCallback(
     (value: string) => {
@@ -177,21 +183,26 @@ export default function Home({
     [router, setIssueNodes]
   )
 
-  const onFilterChanged = (value: IssueStateFilter) => {
-    console.log('[onFilterChanged]', value)
-    router.push(
-      {
-        query: { ...router.query, status: value, first: issuesPerPage },
-      },
-      undefined,
-      { shallow: true }
-    )
-  }
+  const onFilterChanged = useCallback(
+    (value: IssueStateFilter) => {
+      console.log('[onFilterChanged]', value)
+      router.push(
+        {
+          query: { ...router.query, status: value, first: issuesPerPage },
+        },
+        undefined,
+        { shallow: true }
+      )
+    },
+    [router]
+  )
 
-  const onLoadMore = () => {
+  const onLoadMore = useCallback(() => {
     console.log('[onLoadMore]')
+    // update start cursor ref so next query fetches more issues
     startCursorRef.current =
       searchQueryRef.current.data?.search.pageInfo.endCursor ?? null
+    // update the route to trigger a re-render and persist the page for nav
     router.replace(
       {
         query: {
@@ -202,6 +213,15 @@ export default function Home({
       undefined,
       { shallow: true }
     )
+  }, [startCursorRef, router, issueNodes])
+
+  // END hooks
+
+  // BEGIN conditional response
+
+  if (error) {
+    const apiError = processServerError(error)
+    return <Error>{apiError.message}</Error>
   }
 
   return (

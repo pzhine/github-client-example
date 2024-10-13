@@ -1,5 +1,4 @@
 import { SearchIssuesQuery } from '@/graphql/__generated__/graphql'
-import Link from 'next/link'
 import { Container } from './_primitives'
 
 type SearchIssuesEdge = NonNullable<
