@@ -13,19 +13,21 @@ export function IssueList({
   issueNodes: IssueNode[]
   isLoading: boolean
 }) {
-  if ((!issueNodes || !issueNodes.length) && !isLoading) {
-    return <Container $bg="loading"> No results</Container>
-  }
-
   return (
-    <div>
-      {issueNodes!.map((node) => {
-        return (
-          <a key={node.number} href={`issue/${node.number}`}>
-            {node.title}
-          </a>
-        )
-      })}
+    <div data-test-id="issueList:container">
+      {(!issueNodes || !issueNodes.length) && !isLoading ? (
+        <Container $bg="loading" data-test-id="issueList:container">
+          No results
+        </Container>
+      ) : (
+        issueNodes!.map((node) => {
+          return (
+            <a key={node.number} href={`issue/${node.number}`}>
+              {node.title}
+            </a>
+          )
+        })
+      )}
     </div>
   )
 }

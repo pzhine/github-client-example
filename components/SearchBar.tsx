@@ -19,6 +19,7 @@ export function SearchBar({
 
   return (
     <input
+      data-test-id="searchBar:input"
       type="text"
       placeholder="Search for text in title or body..."
       onKeyDown={onKeyDown}

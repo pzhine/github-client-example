@@ -20,12 +20,16 @@ export function Paginator({
     <StyledRow>
       <div>
         {totalCount > showingCount && (
-          <button onClick={onLoadMore} disabled={isLoading}>
+          <button
+            onClick={onLoadMore}
+            disabled={isLoading}
+            data-test-id="paginator:next-page"
+          >
             {isLoading ? 'Loading...' : 'Show more results'}
           </button>
         )}
       </div>
-      <div>
+      <div data-test-id="paginator:result-count">
         Showing {showingCount} of {totalCount}
       </div>
     </StyledRow>
