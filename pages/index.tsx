@@ -132,19 +132,28 @@ export default function Home({
     searchQueryRef.current.variables = variablesFromRoute
   }
 
+  // update issue list in local state
   useEffect(() => {
+    // flatten GQL response to a simple list
     const nextIssueNodes = issueNodesFromQueryData(
       searchQueryRef.current?.data
     )
     if (
-      prevQueryVariablesRef.current.searchQuery ===
-        searchQueryRef.current.variables.searchQuery &&
-      searchQueryRef.current.variables.after! !==
-        prevQueryVariablesRef.current.after!
+      // query has changed
+      prevQueryVariablesRef.current.searchQuery !==
+      searchQueryRef.current.variables.searchQuery
     ) {
-      setIssueNodes((prev) => prev.concat(nextIssueNodes))
-    } else {
+      // replace the issues
+      // console.log('[update] replace')
       setIssueNodes(nextIssueNodes)
+    } else if (
+      // page cursor has changed
+      searchQueryRef.current.variables.after! !==
+      prevQueryVariablesRef.current.after!
+    ) {
+      // append the issues
+      // console.log('[update] append')
+      setIssueNodes((prev) => prev.concat(nextIssueNodes))
     }
     prevQueryVariablesRef.current = { ...searchQueryRef.current.variables }
   }, [searchQueryRef.current.data, router.query])

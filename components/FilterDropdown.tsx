@@ -17,7 +17,10 @@ export function FilterDropdown({
   }
 
   return (
-    <DropdownMenu value={selected} onChange={onDropdownMenuChange}>
+    <DropdownMenu
+      value={selected ?? 'any'}
+      onChange={onDropdownMenuChange}
+    >
       <option value="any">All issues</option>
       <option value="open">Open issues</option>
       <option value="closed">Closed issues</option>
