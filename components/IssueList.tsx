@@ -1,29 +1,30 @@
-import {
-  GetIssuesQuery,
-  SearchIssuesQuery,
-} from '@/graphql/__generated__/graphql'
+import { SearchIssuesQuery } from '@/graphql/__generated__/graphql'
 import Link from 'next/link'
+import { Container } from './_primitives'
+
+type SearchIssuesEdge = NonNullable<
+  NonNullable<SearchIssuesQuery['search']['edges']>[number]
+>['node']
+export type IssueNode = Extract<SearchIssuesEdge, { __typename?: 'Issue' }>
 
 export function IssueList({
-  issueEdges,
+  issueNodes,
+  isLoading,
 }: {
-  issueEdges: SearchIssuesQuery['search']['edges']
+  issueNodes: IssueNode[]
+  isLoading: boolean
 }) {
-  if (!issueEdges || !issueEdges.length) {
-    return <p>No data available</p>
+  if ((!issueNodes || !issueNodes.length) && !isLoading) {
+    return <Container $bg="loading"> No results</Container>
   }
 
   return (
     <div>
-      {issueEdges!.map((item) => {
-        const node = item?.node!
-        if (node.__typename !== 'Issue') {
-          return null
-        }
+      {issueNodes!.map((node) => {
         return (
-          <Link key={node.number} href={`issue/${node.number}`}>
+          <a key={node.number} href={`issue/${node.number}`}>
             {node.title}
-          </Link>
+          </a>
         )
       })}
     </div>

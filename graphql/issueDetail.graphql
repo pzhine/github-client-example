@@ -2,6 +2,7 @@ query getIssueDetail($issueNumber: Int!) {
   repository(owner: "facebook", name: "react") {
     issue(number: $issueNumber) {
       title
+      number
       body
       state
       createdAt
@@ -10,7 +11,7 @@ query getIssueDetail($issueNumber: Int!) {
         login
         avatarUrl
       }
-      comments(first: 5) {
+      comments (first: 100) {
         nodes {
           body
           author {

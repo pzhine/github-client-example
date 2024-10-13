@@ -7,7 +7,7 @@ const _Layout = ({
   className,
 }: {
   children: ReactNode
-  className: string
+  className?: string
 }) => {
   return (
     <div className={className}>

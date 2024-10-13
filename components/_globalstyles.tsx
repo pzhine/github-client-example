@@ -1,9 +1,10 @@
 import { ThemeType } from '@/styled'
-import styled, { createGlobalStyle } from 'styled-components'
+import { createGlobalStyle } from 'styled-components'
 
 export const lightTheme = {
   colors: {
     text: '#111',
+    text2: '#666',
     background: '#fff',
     error: '#f04532',
     loading: '#bd60b8',
@@ -15,7 +16,8 @@ export const darkTheme: ThemeType = {
   colors: {
     ...lightTheme.colors,
     text: '#fff',
-    background: '#333',
+    text2: '#aaa',
+    background: '#222',
   },
 }
 

@@ -31707,19 +31707,16 @@ export type GetIssueDetailQueryVariables = Exact<{
 }>;
 
 
-export type GetIssueDetailQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', issue?: { __typename?: 'Issue', title: string, body: string, state: IssueState, createdAt: any, updatedAt: any, author?: { __typename?: 'Bot', login: string, avatarUrl: any } | { __typename?: 'EnterpriseUserAccount', login: string, avatarUrl: any } | { __typename?: 'Mannequin', login: string, avatarUrl: any } | { __typename?: 'Organization', login: string, avatarUrl: any } | { __typename?: 'User', login: string, avatarUrl: any } | null, comments: { __typename?: 'IssueCommentConnection', nodes?: Array<{ __typename?: 'IssueComment', body: string, createdAt: any, author?: { __typename?: 'Bot', login: string } | { __typename?: 'EnterpriseUserAccount', login: string } | { __typename?: 'Mannequin', login: string } | { __typename?: 'Organization', login: string } | { __typename?: 'User', login: string } | null } | null> | null } } | null } | null };
-
-export type GetIssuesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetIssuesQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', issues: { __typename?: 'IssueConnection', edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', title: string, url: any, number: number } | null } | null> | null } } | null };
+export type GetIssueDetailQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', issue?: { __typename?: 'Issue', title: string, number: number, body: string, state: IssueState, createdAt: any, updatedAt: any, author?: { __typename?: 'Bot', login: string, avatarUrl: any } | { __typename?: 'EnterpriseUserAccount', login: string, avatarUrl: any } | { __typename?: 'Mannequin', login: string, avatarUrl: any } | { __typename?: 'Organization', login: string, avatarUrl: any } | { __typename?: 'User', login: string, avatarUrl: any } | null, comments: { __typename?: 'IssueCommentConnection', nodes?: Array<{ __typename?: 'IssueComment', body: string, createdAt: any, author?: { __typename?: 'Bot', login: string } | { __typename?: 'EnterpriseUserAccount', login: string } | { __typename?: 'Mannequin', login: string } | { __typename?: 'Organization', login: string } | { __typename?: 'User', login: string } | null } | null> | null } } | null } | null };
 
 export type SearchIssuesQueryVariables = Exact<{
   searchQuery: Scalars['String']['input'];
+  first: Scalars['Int']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type SearchIssuesQuery = { __typename?: 'Query', search: { __typename?: 'SearchResultItemConnection', issueCount: number, edges?: Array<{ __typename?: 'SearchResultItemEdge', node?: { __typename?: 'App' } | { __typename?: 'Discussion' } | { __typename?: 'Issue', number: number, title: string, state: IssueState } | { __typename?: 'MarketplaceListing' } | { __typename?: 'Organization' } | { __typename?: 'PullRequest' } | { __typename?: 'Repository' } | { __typename?: 'User' } | null } | null> | null } };
+export type SearchIssuesQuery = { __typename?: 'Query', search: { __typename?: 'SearchResultItemConnection', issueCount: number, edges?: Array<{ __typename?: 'SearchResultItemEdge', node?: { __typename?: 'App' } | { __typename?: 'Discussion' } | { __typename?: 'Issue', number: number, title: string, state: IssueState, createdAt: any, author?: { __typename?: 'Bot', login: string } | { __typename?: 'EnterpriseUserAccount', login: string } | { __typename?: 'Mannequin', login: string } | { __typename?: 'Organization', login: string } | { __typename?: 'User', login: string } | null } | { __typename?: 'MarketplaceListing' } | { __typename?: 'Organization' } | { __typename?: 'PullRequest' } | { __typename?: 'Repository' } | { __typename?: 'User' } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null } } };
 
 
 export const GetIssueDetailDocument = gql`
@@ -31727,6 +31724,7 @@ export const GetIssueDetailDocument = gql`
   repository(owner: "facebook", name: "react") {
     issue(number: $issueNumber) {
       title
+      number
       body
       state
       createdAt
@@ -31735,7 +31733,7 @@ export const GetIssueDetailDocument = gql`
         login
         avatarUrl
       }
-      comments(first: 5) {
+      comments(first: 100) {
         nodes {
           body
           author {
@@ -31781,56 +31779,9 @@ export type GetIssueDetailQueryHookResult = ReturnType<typeof useGetIssueDetailQ
 export type GetIssueDetailLazyQueryHookResult = ReturnType<typeof useGetIssueDetailLazyQuery>;
 export type GetIssueDetailSuspenseQueryHookResult = ReturnType<typeof useGetIssueDetailSuspenseQuery>;
 export type GetIssueDetailQueryResult = Apollo.QueryResult<GetIssueDetailQuery, GetIssueDetailQueryVariables>;
-export const GetIssuesDocument = gql`
-    query getIssues {
-  repository(owner: "facebook", name: "react") {
-    issues(last: 20, states: CLOSED) {
-      edges {
-        node {
-          title
-          url
-          number
-        }
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useGetIssuesQuery__
- *
- * To run a query within a React component, call `useGetIssuesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetIssuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetIssuesQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetIssuesQuery(baseOptions?: Apollo.QueryHookOptions<GetIssuesQuery, GetIssuesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetIssuesQuery, GetIssuesQueryVariables>(GetIssuesDocument, options);
-      }
-export function useGetIssuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetIssuesQuery, GetIssuesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetIssuesQuery, GetIssuesQueryVariables>(GetIssuesDocument, options);
-        }
-export function useGetIssuesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetIssuesQuery, GetIssuesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetIssuesQuery, GetIssuesQueryVariables>(GetIssuesDocument, options);
-        }
-export type GetIssuesQueryHookResult = ReturnType<typeof useGetIssuesQuery>;
-export type GetIssuesLazyQueryHookResult = ReturnType<typeof useGetIssuesLazyQuery>;
-export type GetIssuesSuspenseQueryHookResult = ReturnType<typeof useGetIssuesSuspenseQuery>;
-export type GetIssuesQueryResult = Apollo.QueryResult<GetIssuesQuery, GetIssuesQueryVariables>;
 export const SearchIssuesDocument = gql`
-    query SearchIssues($searchQuery: String!) {
-  search(query: $searchQuery, type: ISSUE, first: 20) {
+    query SearchIssues($searchQuery: String!, $first: Int!, $after: String) {
+  search(query: $searchQuery, type: ISSUE, first: $first, after: $after) {
     issueCount
     edges {
       node {
@@ -31838,8 +31789,16 @@ export const SearchIssuesDocument = gql`
           number
           title
           state
+          createdAt
+          author {
+            login
+          }
         }
       }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
     }
   }
 }
@@ -31858,6 +31817,8 @@ export const SearchIssuesDocument = gql`
  * const { data, loading, error } = useSearchIssuesQuery({
  *   variables: {
  *      searchQuery: // value for 'searchQuery'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */

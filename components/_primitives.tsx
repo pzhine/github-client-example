@@ -9,3 +9,13 @@ export const Container = styled.div<{
     props.$bg ? props.theme.colors[props.$bg] : 'transparent'};
   color: ${(props) => props.theme.colors.text};
 `
+export const DropdownMenu = styled.select`
+  padding: 4px;
+`
+
+export const Row = styled.div`
+  && {
+    flex-direction: row;
+    align-items: center;
+  }
+`
