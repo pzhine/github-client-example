@@ -8,6 +8,7 @@ query SearchIssues($searchQuery: String!, $first: Int!, $after: String) {
           title
           state
           createdAt
+          closedAt
           author {
             login
           }

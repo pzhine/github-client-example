@@ -2,6 +2,13 @@ import { ThemeType } from '@/styled'
 import { createGlobalStyle } from 'styled-components'
 
 export const lightTheme = {
+  sizes: {
+    controlHeight: '2.2rem',
+  },
+  typeography: {
+    medium: '15px',
+    small: '12px',
+  },
   colors: {
     text: '#111',
     text2: '#666',
@@ -9,6 +16,11 @@ export const lightTheme = {
     background2: '#ccc',
     error: '#f04532',
     loading: '#bd60b8',
+    button: '#035efc',
+    buttonDisabled: '#6784b5',
+    buttonActive: '#003ca1',
+    openStatus: '#00a60b',
+    closedStatus: '#ab03a2',
   },
 }
 
@@ -28,6 +40,7 @@ export const GlobalStyle = createGlobalStyle`
   body {
     color: ${({ theme }) => theme.colors.text};
     background: ${({ theme }) => theme.colors.background};
+    font-size: ${(props) => props.theme.typeography.medium};
     padding: 10px 24px;
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,

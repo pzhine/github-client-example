@@ -3,6 +3,7 @@ import sanitizeHtml from 'sanitize-html'
 import { gfmHtml, gfm } from 'micromark-extension-gfm'
 import { IssueContent } from '@/pages/issue/[issueNumber]'
 import styled from 'styled-components'
+import { formatGitHubDate } from '@/lib/dateTime'
 
 export const IssueComment = styled(
   ({
@@ -24,8 +25,7 @@ export const IssueComment = styled(
           {issueContent.author?.login}{' '}
           <span>
             {' '}
-            commented on{' '}
-            {issueContent.createdAt.replace('T', ' ').replace('Z', '')}
+            commented {formatGitHubDate(issueContent.createdAt, true)}
           </span>
         </div>
         <div
@@ -44,7 +44,7 @@ export const IssueComment = styled(
     font-weight: bold;
     flex-direction: row;
     padding: 12px;
-    font-size: medium;
+    font-size: ${(props) => props.theme.typeography.medium};
     & span {
       margin-left: 0.5em;
       font-weight: normal;
