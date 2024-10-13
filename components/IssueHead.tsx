@@ -10,7 +10,7 @@ export const IssueHead = styled(
     className?: string
   }) => {
     return (
-      <div className={className}>
+      <div className={className} data-test-id="issue:head">
         <h2>
           {issueDetail.title} <span> #{issueDetail.number}</span>
         </h2>

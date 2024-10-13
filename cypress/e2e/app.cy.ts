@@ -2,12 +2,29 @@ const RESULTS_PER_PAGE = 20 // update this if it is updated in the .env file
 const SINGULAR_ISSUE_TEXT = '7779988-20241007' // this should be so rare it appears in only one issue
 
 describe('GitHub Client example app ', () => {
+  let firstText: string
+  let lastText: string
+
   beforeEach(() => {
     cy.visit('http://localhost:3000')
     cy.get('[data-test-id="paginator:result-count"]').as('result-count')
     cy.get('[data-test-id="paginator:next-page"]').as('next-page')
     cy.get('[data-test-id="issueList:container"]').as('issue-list')
     cy.get('@issue-list').get('a').as('issue-rows')
+
+    // capture first and last item text
+    cy.get('@issue-rows')
+      .first()
+      .invoke('text')
+      .then((txt) => {
+        firstText = txt
+      })
+    cy.get('@issue-rows')
+      .last()
+      .invoke('text')
+      .then((txt) => {
+        lastText = txt
+      })
   })
   context('paging', () => {
     it('shows the right number of rows initially', () => {
@@ -19,6 +36,13 @@ describe('GitHub Client example app ', () => {
       cy.get('@next-page').click().should('be.enabled')
       cy.get('@issue-rows').should('have.length', RESULTS_PER_PAGE * 2)
       cy.get('@result-count').contains(`Showing ${RESULTS_PER_PAGE * 2}`)
+    })
+    it('maintains original items when next page is added', () => {
+      cy.get('@next-page').click().should('be.enabled')
+      cy.get('@issue-rows').first().should('have.text', firstText)
+      cy.get('@issue-rows')
+        .eq(RESULTS_PER_PAGE - 1)
+        .should('have.text', lastText)
     })
     it('increases results exactly twice when next page is clicked twice', () => {
       // click the button twice
@@ -36,6 +60,12 @@ describe('GitHub Client example app ', () => {
     it('hides the next button when there are no more results', () => {
       cy.searchText(SINGULAR_ISSUE_TEXT)
       cy.get('@next-page').should('not.exist')
+    })
+    it('paginates search results', () => {
+      cy.searchText('testing')
+      cy.get('@next-page').click().should('be.enabled')
+      cy.get('@issue-rows').should('have.length', RESULTS_PER_PAGE * 2)
+      cy.get('@result-count').contains(`Showing ${RESULTS_PER_PAGE * 2}`)
     })
   })
 
@@ -66,6 +96,37 @@ describe('GitHub Client example app ', () => {
     it('correctly reports no results', () => {
       cy.searchText(`${SINGULAR_ISSUE_TEXT}${SINGULAR_ISSUE_TEXT}`)
       cy.get('@issue-list').contains('no results', { matchCase: false })
+    })
+    it('persists the search after page reload', () => {
+      cy.searchText(SINGULAR_ISSUE_TEXT)
+      cy.reload()
+      cy.get('@issue-rows')
+        .should('have.length', 1)
+        .eq(0)
+        .contains(SINGULAR_ISSUE_TEXT)
+    })
+  })
+  context('navigation', () => {
+    it('navigates to issue detail and back', () => {
+      cy.get('@issue-rows').eq(0).click()
+      cy.url().should('match', /\/issue\/[0-9]+/)
+      cy.get('[data-test-id="issue:head"]').should(
+        'contain.text',
+        firstText
+      )
+      cy.go('back')
+      cy.get('@issue-rows').should('have.length', RESULTS_PER_PAGE)
+    })
+    it('navigates from search to issue detail and back', () => {
+      cy.searchText(SINGULAR_ISSUE_TEXT)
+      cy.get('@next-page').should('not.exist')
+      cy.get('@issue-rows').eq(0).click()
+      cy.get('[data-test-id="issue:head"]').should(
+        'contain.text',
+        SINGULAR_ISSUE_TEXT
+      )
+      cy.go('back')
+      cy.get('@issue-rows').should('have.length', 1)
     })
   })
 })
