@@ -6,6 +6,7 @@ export const lightTheme = {
     text: '#111',
     text2: '#666',
     background: '#fff',
+    background2: '#ccc',
     error: '#f04532',
     loading: '#bd60b8',
   },
@@ -18,6 +19,7 @@ export const darkTheme: ThemeType = {
     text: '#fff',
     text2: '#aaa',
     background: '#222',
+    background2: '#333',
   },
 }
 

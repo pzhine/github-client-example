@@ -6,28 +6,47 @@ import {
   GetIssueDetailQuery,
 } from '@/graphql/__generated__/graphql'
 import { ApiError, processServerError } from '@/lib/errors'
+import { IssueHead } from '@/components/IssueHead'
+import { Error } from '@/components/Error'
+import { IssueComment } from '@/components/IssueComment'
+
+export type IssueDetail = NonNullable<
+  NonNullable<GetIssueDetailQuery['repository']>['issue']
+>
+
+export type IssueContent =
+  | IssueDetail
+  | NonNullable<NonNullable<IssueDetail['comments']['nodes']>[number]>
 
 export default function IssueDetailPage({
   initialData,
   apiError,
 }: {
-  initialData?: GetIssueDetailQuery
+  initialData: IssueDetail
   apiError?: ApiError
 }) {
   if (apiError) {
-    return (
-      <div>
-        <h1>Error {apiError.code}</h1>
-        <p>{apiError.message}</p>
-      </div>
-    )
+    return <Error>{apiError.message}</Error>
   }
   return (
     <>
       <Head>
         <title>Issue</title>
       </Head>
-      <h2>{initialData!.repository!.issue!.title}</h2>
+      <IssueHead issueDetail={initialData} />
+      <IssueComment issueContent={initialData} />
+      {!!initialData.comments.nodes?.length &&
+        initialData.comments.nodes.map(
+          (comment) =>
+            !!comment && (
+              <IssueComment
+                key={comment.createdAt
+                  .toString()
+                  .concat(comment.author?.login ?? '')}
+                issueContent={comment}
+              />
+            )
+        )}
     </>
   )
 }
@@ -50,9 +69,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     })
 
+    if (!data?.repository?.issue) {
+      return {
+        notFound: true,
+      }
+    }
+
     return {
       props: {
-        initialData: data,
+        initialData: data.repository.issue,
       },
     }
   } catch (error) {
