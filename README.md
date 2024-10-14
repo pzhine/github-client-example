@@ -10,10 +10,25 @@ This demo app is a frontend for the GitHub GraphQL API. The frontend allows you 
 - Styled Components v6
 - GraphQL v16
 - ApolloClient v3
+- Cypress v13
 
-## Deploying on Vercel
+## Component overview
+![component overview](./public/component-overview.png)
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-styled-components)
+## Running and testing
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-styled-components&project-name=with-styled-components&repository-name=with-styled-components)
+Install dependencies
+```
+yarn
+```
+
+Run locally
+```
+yarn dev
+```
+
+E2E Testing with Cypress
+```
+yarn cy:open
+```
 
