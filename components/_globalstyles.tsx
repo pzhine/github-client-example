@@ -1,7 +1,7 @@
 import { ThemeType } from '@/styled'
 import { createGlobalStyle } from 'styled-components'
 
-export const lightTheme = {
+const lightTheme = {
   sizes: {
     controlHeight: '2.2rem',
   },
@@ -12,6 +12,7 @@ export const lightTheme = {
   colors: {
     text: '#111',
     text2: '#666',
+    controlText: '#fff',
     background: '#fff',
     background2: '#ccc',
     error: '#f04532',
@@ -24,7 +25,7 @@ export const lightTheme = {
   },
 }
 
-export const darkTheme: ThemeType = {
+const darkTheme: ThemeType = {
   ...lightTheme,
   colors: {
     ...lightTheme.colors,
@@ -35,13 +36,20 @@ export const darkTheme: ThemeType = {
   },
 }
 
+export const themes = {
+  light: lightTheme,
+  dark: darkTheme,
+}
+
+export type Themes = keyof typeof themes
+
 export const GlobalStyle = createGlobalStyle`
   html,
   body {
     color: ${({ theme }) => theme.colors.text};
     background: ${({ theme }) => theme.colors.background};
     font-size: ${(props) => props.theme.typeography.medium};
-    padding: 10px 24px;
+    padding: 0;
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
       Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;

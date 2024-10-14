@@ -1,8 +1,8 @@
 import styled from 'styled-components'
-import { lightTheme } from './_globalstyles'
+import { themes } from './_globalstyles'
 
 export const Container = styled.div<{
-  $bg?: keyof typeof lightTheme.colors
+  $bg?: keyof typeof themes.light.colors
 }>`
   padding: 8px;
   background: ${(props) =>
@@ -28,8 +28,9 @@ export const DropdownMenu = styled.select<{
 
 export const Button = styled.button`
   appearance: none;
+  cursor: pointer;
   background: ${(props) => props.theme.colors.button};
-  color: ${(props) => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.controlText};
   font-size: ${(props) => props.theme.typeography.medium};
   border: none;
   border-radius: 5px;
