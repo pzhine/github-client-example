@@ -24,8 +24,8 @@ export const IssueRow = styled(
       <a href={`issue/${issueNode.number}`}>
         <StatusTile issueStatus={issueNode.state} compact />
         <div>
-          {issueNode.title}
-          <span>
+          <span className="issue-title">{issueNode.title}</span>
+          <span className="issue-meta">
             {issueNode.author?.login}
             {issueNode.state === IssueState.Closed
               ? ` closed ${formatGitHubDate(issueNode.closedAt)}`
@@ -51,7 +51,7 @@ export const IssueRow = styled(
     & > div {
       margin-right: 8px;
 
-      & > span {
+      & .issue-meta {
         color: ${(props) => props.theme.colors.text2};
         margin-top: 4px;
       }

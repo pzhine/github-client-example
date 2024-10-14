@@ -14,12 +14,14 @@ describe('GitHub Client example app ', () => {
 
     // capture first and last item text
     cy.get('@issue-rows')
+      .get('.issue-title')
       .first()
       .invoke('text')
       .then((txt) => {
         firstText = txt
       })
     cy.get('@issue-rows')
+      .get('.issue-title')
       .last()
       .invoke('text')
       .then((txt) => {
@@ -39,10 +41,10 @@ describe('GitHub Client example app ', () => {
     })
     it('maintains original items when next page is added', () => {
       cy.get('@next-page').click().should('be.enabled')
-      cy.get('@issue-rows').first().should('have.text', firstText)
+      cy.get('@issue-rows').first().should('contain.text', firstText)
       cy.get('@issue-rows')
         .eq(RESULTS_PER_PAGE - 1)
-        .should('have.text', lastText)
+        .should('contain.text', lastText)
     })
     it('increases results exactly twice when next page is clicked twice', () => {
       // click the button twice
@@ -68,7 +70,6 @@ describe('GitHub Client example app ', () => {
       cy.get('@result-count').contains(`Showing ${RESULTS_PER_PAGE * 2}`)
     })
   })
-
   context('searching', () => {
     it('finds a singular search result', () => {
       cy.searchText(SINGULAR_ISSUE_TEXT)
@@ -127,6 +128,77 @@ describe('GitHub Client example app ', () => {
       )
       cy.go('back')
       cy.get('@issue-rows').should('have.length', 1)
+    })
+  })
+  context('filtering', () => {
+    beforeEach(() => {
+      cy.get('[data-test-id="filter:select"]').as('filter-select')
+    })
+
+    it('only shows open issues when status filter is "open"', () => {
+      cy.get('@filter-select').select('open')
+      cy.get('@issue-rows')
+        .get('[data-issue-status="OPEN"]')
+        .should('have.length', RESULTS_PER_PAGE)
+      cy.get('@issue-rows')
+        .get('[data-issue-status="CLOSED"]')
+        .should('not.exist')
+    })
+    it('only shows closed issues when status filter is "closed"', () => {
+      cy.get('@filter-select').select('closed')
+      cy.get('@issue-rows')
+        .get('[data-issue-status="CLOSED"]')
+        .should('have.length', RESULTS_PER_PAGE)
+      cy.get('@issue-rows')
+        .get('[data-issue-status="OPEN"]')
+        .should('not.exist')
+    })
+    it('only shows filtered issues after loading next page', () => {
+      cy.get('@filter-select').select('open')
+      cy.get('@issue-rows')
+        .get('[data-issue-status="OPEN"]')
+        .should('have.length', RESULTS_PER_PAGE)
+      cy.get('@next-page').click().should('be.enabled')
+      cy.get('@issue-rows')
+        .get('[data-issue-status="OPEN"]')
+        .should('have.length', RESULTS_PER_PAGE * 2)
+      cy.get('@issue-rows')
+        .get('[data-issue-status="CLOSED"]')
+        .should('not.exist')
+    })
+    it('only shows filtered issues after searching', () => {
+      cy.get('@filter-select').select('open')
+      cy.searchText('testing')
+      cy.get('@issue-rows')
+        .get('[data-issue-status="OPEN"]')
+        .should('have.length', RESULTS_PER_PAGE)
+      cy.get('@issue-rows')
+        .get('[data-issue-status="CLOSED"]')
+        .should('not.exist')
+    })
+    it('persists filter on reload', () => {
+      cy.get('@filter-select').select('open')
+      cy.get('@issue-rows')
+        .get('[data-issue-status="OPEN"]')
+        .should('have.length', RESULTS_PER_PAGE)
+      cy.reload()
+      cy.get('@issue-rows')
+        .get('[data-issue-status="OPEN"]')
+        .should('have.length', RESULTS_PER_PAGE)
+      cy.get('@issue-rows')
+        .get('[data-issue-status="CLOSED"]')
+        .should('not.exist')
+      cy.get('@filter-select').select('closed')
+      cy.get('@issue-rows')
+        .get('[data-issue-status="CLOSED"]')
+        .should('have.length', RESULTS_PER_PAGE)
+      cy.reload()
+      cy.get('@issue-rows')
+        .get('[data-issue-status="CLOSED"]')
+        .should('have.length', RESULTS_PER_PAGE)
+      cy.get('@issue-rows')
+        .get('[data-issue-status="OPEN"]')
+        .should('not.exist')
     })
   })
 })

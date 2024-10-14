@@ -26,6 +26,7 @@ export const FilterDropdown = styled(
           value={selected ?? 'any'}
           onChange={onDropdownMenuChange}
           $width="150px"
+          data-test-id="filter:select"
         >
           <option value="any">All issues</option>
           <option value="open">Open issues</option>

@@ -11,7 +11,7 @@ export const StatusTile = styled(
     issueStatus: IssueState
     compact?: boolean
   }) => (
-    <div className={className}>
+    <div className={className} data-issue-status={issueStatus}>
       {compact ? issueStatus.charAt(0) : issueStatus}
     </div>
   )
